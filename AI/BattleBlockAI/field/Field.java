@@ -92,7 +92,7 @@ public class Field {
 		return true;
 	}
 
-	private boolean addShape(Shape shape){
+	public boolean addShape(Shape shape){
 		if (!this.canPlaceShape(shape)){
 			return false;
 		}
@@ -103,7 +103,7 @@ public class Field {
 		return true;
 	}
 
-	private boolean removeShape(Shape shape){
+	public boolean removeShape(Shape shape){
 		Cell[] blocks = shape.getBlocks();
 		for (int i = 0; i<blocks.length; i++){
 			this.grid[blocks[i].getLocation().x][blocks[i].getLocation().y].setEmpty();
@@ -113,7 +113,7 @@ public class Field {
 
 	public float calculateHeuristicWithShape(Shape shape){
 		if (!addShape(shape)){
-			return 400;
+			return 999999999;
 		}
 		float hVal = calculateHeuristic();
 		removeShape(shape);
@@ -146,7 +146,7 @@ public class Field {
 				lineClears++;
 			}
 		}
-		return (aggregateHeight+numHoles)/(lineClears+1);
+		return (aggregateHeight+numHoles*4)/(lineClears+1);
 	}
 
 

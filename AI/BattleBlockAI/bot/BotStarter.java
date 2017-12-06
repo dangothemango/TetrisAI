@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.awt.Point;
 
 import moves.Move;
 import moves.MoveType;
@@ -83,7 +84,11 @@ public class BotStarter {
 				}
 				shape.oneUp();
 				if (!field.canPlaceShape(shape)) continue;
-				float t = field.calculateHeuristicWithShape(shape);
+				float t = 99999999;
+				if (field.addShape(shape)){
+					t = testNextShape(state,field);
+					field.removeShape(shape);
+				} 
 				if ( t < maxH ){
 					maxH = t;
 					maxLoc = i;
@@ -112,5 +117,28 @@ public class BotStarter {
 		}
 		moves.add(MoveType.DROP);
 		return moves;
+	}
+
+	private float testNextShape(BotState state, Field field){
+		Shape shape = new Shape(state.getNextShape(),field,new Point(3,-1));
+
+		//TODO: enable rotations
+		float maxH = 9999999;
+		for (int rot =0; rot<shape.getUniqueRot(); rot++){
+			for (int i = 0-shape.getStartColumn(); i<field.getWidth(); i++){
+				shape.setLocation(i,-1);
+				while (field.canPlaceShape(shape)){
+					shape.oneDown();
+				}
+				shape.oneUp();
+				if (!field.canPlaceShape(shape)) continue;
+				float t = field.calculateHeuristicWithShape(shape);
+				if ( t < maxH ){
+					maxH = t;
+				}
+			}
+			shape.turnRight();
+		}
+		return maxH;
 	}
 }

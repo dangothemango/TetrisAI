@@ -54,7 +54,7 @@ public class Cell {
 
 	public boolean hasCollision(Field field) {
         Cell cell = field.getCell(this.location.x, this.location.y);
-        return cell != null && (this.state == CellType.SHAPE && (cell.isSolid() || cell.isBlock()));
+        return cell != null && (this.state == CellType.SHAPE && (cell.isSolid() || cell.isBlock() || cell.isShape()));
     }
 	
 	public void setShape() {
