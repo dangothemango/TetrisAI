@@ -39,6 +39,11 @@ public class Field {
 	private int height;
 	private Cell grid[][];
 
+	private double aggConst=-.510066;
+	private double lineConst = .760666;
+	private double holesConst = -.35663;
+	private double bumpConst = -.184483;
+
 	public Field(int width, int height, String input) {
 	    this.width = width;
 	    this.height = height;
@@ -85,7 +90,7 @@ public class Field {
 	public boolean canPlaceShape(Shape shape){
 		Cell[] blocks = shape.getBlocks();
 		for (int i = 0; i<blocks.length; i++){
-			if (blocks[i].isOutOfBoundaries(this) || blocks[i].hasCollision(this)){
+			if (blocks[i].getLocation().y <0 || blocks[i].isOutOfBoundaries(this) || blocks[i].hasCollision(this)){
 				return false;
 			}
 		}
@@ -111,25 +116,31 @@ public class Field {
 		return true;
 	}
 
-	public float calculateHeuristicWithShape(Shape shape){
+	public double calculateHeuristicWithShape(Shape shape){
 		if (!addShape(shape)){
-			return 999999999;
+			return -999999999;
 		}
-		float hVal = calculateHeuristic();
+		double hVal = calculateHeuristic();
 		removeShape(shape);
 		return hVal;
 	}
 
-	public float calculateHeuristic(){
+	public double calculateHeuristic(){
 		int aggregateHeight = 0;
+		int bumpiness = 0;
 		int numHoles = 0;
 		int lineClears = 0;
+		int prevHeight=-1;
 		for (int x = 0; x < width; x++){
 			boolean foundBlock = false;
 			for (int y = 0; y<height; y++){
 				if (!foundBlock && !grid[x][y].isEmpty()){
 					foundBlock=true;
-					aggregateHeight+=height-1-y;
+					aggregateHeight+=height-y;
+					if (prevHeight!=-1){
+						bumpiness+=Math.abs(height-y-prevHeight);
+					}
+					prevHeight=height-y;
 				} else if (foundBlock && grid[x][y].isEmpty()){
 					numHoles++;
 				}
@@ -146,7 +157,10 @@ public class Field {
 				lineClears++;
 			}
 		}
-		return (aggregateHeight+numHoles*4)/(lineClears+1);
+		return 	aggConst * aggregateHeight +
+				lineConst * (lineClears<=1? .5:1)* lineClears +
+				holesConst *numHoles +
+				bumpConst * bumpiness;
 	}
 
 

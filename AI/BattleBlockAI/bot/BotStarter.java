@@ -29,6 +29,7 @@ import java.awt.Point;
 import moves.Move;
 import moves.MoveType;
 import field.Shape;
+import field.ShapeType;
 import field.Field;
 /**
  * BotStarter class
@@ -53,8 +54,6 @@ public class BotStarter {
 	 * @return a list of moves to execute
 	 */
 	public Move getMove(BotState state) {
-		List<MoveType> allMoves = Collections.unmodifiableList(Arrays.asList(MoveType.values()));
-		MoveType move = null;
 
         ArrayList<MoveType> moves = getPathToBestMove(state);
 		
@@ -73,23 +72,23 @@ public class BotStarter {
 		int startPosition = shape.getLocation().x;
 
 		//TODO: enable rotations
-		float maxH = 9999999;
+		double maxH = -9999999;
 		int maxLoc = -1;
 		int maxRot = -1;
 		for (int rot =0; rot<shape.getUniqueRot(); rot++){
 			for (int i = 0-shape.getStartColumn(); i<field.getWidth(); i++){
-				shape.setLocation(i,-1);
+				shape.setLocation(i,0);
 				while (field.canPlaceShape(shape)){
 					shape.oneDown();
 				}
 				shape.oneUp();
 				if (!field.canPlaceShape(shape)) continue;
-				float t = 99999999;
+				double t = -99999999;
 				if (field.addShape(shape)){
 					t = testNextShape(state,field);
 					field.removeShape(shape);
 				} 
-				if ( t < maxH ){
+				if ( t > maxH ){
 					maxH = t;
 					maxLoc = i;
 					maxRot = rot;
@@ -119,26 +118,60 @@ public class BotStarter {
 		return moves;
 	}
 
-	private float testNextShape(BotState state, Field field){
+	private double testNextShape(BotState state, Field field){
 		Shape shape = new Shape(state.getNextShape(),field,new Point(3,-1));
 
 		//TODO: enable rotations
-		float maxH = 9999999;
+		double maxH = -9999999;
+
 		for (int rot =0; rot<shape.getUniqueRot(); rot++){
 			for (int i = 0-shape.getStartColumn(); i<field.getWidth(); i++){
-				shape.setLocation(i,-1);
+				shape.setLocation(i,0);
 				while (field.canPlaceShape(shape)){
 					shape.oneDown();
 				}
 				shape.oneUp();
 				if (!field.canPlaceShape(shape)) continue;
-				float t = field.calculateHeuristicWithShape(shape);
-				if ( t < maxH ){
+				// double t = -9999999;
+				// if (field.addShape(shape)){
+				// 	t = testProbableShapes(field);
+				// 	field.removeShape(shape);
+				// } 
+				double t = field.calculateHeuristicWithShape(shape);
+				if ( t > maxH ){
 					maxH = t;
 				}
 			}
 			shape.turnRight();
 		}
 		return maxH;
+	}
+
+	private double testProbableShapes(Field field){
+		List<ShapeType> allShapes = Collections.unmodifiableList(Arrays.asList(ShapeType.values()));
+
+		double totalH=0;
+		for (int shapeIndex = 0; shapeIndex<allShapes.size()-1; shapeIndex++){
+			Shape shape = new Shape(allShapes.get(shapeIndex),field,new Point(3,-1));
+
+			double maxH = -9999999;
+			for (int rot =0; rot<shape.getUniqueRot(); rot++){
+				for (int i = 0-shape.getStartColumn(); i<field.getWidth(); i++){
+					shape.setLocation(i,0);
+					while (field.canPlaceShape(shape)){
+						shape.oneDown();
+					}
+					shape.oneUp();
+					if (!field.canPlaceShape(shape)) continue;
+					double t= field.calculateHeuristicWithShape(shape);
+					if ( t > maxH ){
+						maxH = t;
+					}
+				}
+				shape.turnRight();
+			}
+			totalH += (1.0/7.0) *maxH;		
+		}
+		return totalH;
 	}
 }
