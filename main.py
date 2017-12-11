@@ -327,18 +327,34 @@ def reset():
 #AI GOES HERE
 from AI.Tetrai import tetrai
 
+#Genetic Algorithm being read from Text file for actual genetic variables
 grid_data = []
 FILE = open('Outputs.txt')
+f_mother = 0.0
+f_father = 0.0
+i_mother = 0
+i_father = 0
+alternate = False
 
 with FILE as f:
     grid_data = [i.split(',') for i in f.readlines()]
-L = len(grid_data) - 1
 
-ai = tetrai(float(grid_data[L][0]),float(grid_data[L][1]),float(grid_data[L][2]),float(grid_data[L][3]),1,columnwidth,rowheight)
+for j in range(0, len(grid_data)):
+    fitness = float(grid_data[j][4])
+    if fitness > f_mother:
+        i_father = i_mother
+        f_father = f_mother        
+        i_mother = j
+        f_mother = fitness
+
+a = (float(grid_data[i_mother][0]) + float(grid_data[i_father][0])) / 2.0
+b = (float(grid_data[i_mother][1]) + float(grid_data[i_father][1])) / 2.0
+c = (float(grid_data[i_mother][2]) + float(grid_data[i_father][2])) / 2.0
+d = (float(grid_data[i_mother][3]) + float(grid_data[i_father][3])) / 2.0
+
+ai = tetrai(a,b,c,d,1,columnwidth,rowheight)
 
 moves = Queue()
-
-
 
 # run the game loop
 while True:
