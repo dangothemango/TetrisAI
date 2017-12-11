@@ -23,9 +23,22 @@ class tetrai:
 		self.holesConst = holesConst
 		self.bumpConst =  bumpConst
 		self.multiLineWeight = multiLineWeight
+		self.normalizeConstants()
 		self.columnWidth = columnWidth
 		self.rowHeight = rowHeight
+		self.score = 0
 		print("with a={}, l={}, h={}, b={}, m={}".format(aggConst,lineConst,holesConst,bumpConst,multiLineWeight))
+
+	def normalizeConstants(self):
+		magnitude = abs(self.aggConst)+abs(self.lineConst)+abs(self.holesConst)+abs(self.bumpConst)+abs(self.multiLineWeight)
+		self.aggConst /= magnitude
+		self.lineConst /= magnitude
+		self.holesConst /= magnitude
+		self.bumpConst /= magnitude
+		self.multiLineWeight /= magnitude
+
+	def setScore(self, points):
+		self.score=points
 
 	def calculateNewMove(self,board,currentPiece,nextPiece):
 		maxH = -99999999
@@ -39,7 +52,7 @@ class tetrai:
 				self.moveShapeToBottom(currentPiece,board)
 				if (self.shapeOutOfBounds(currentPiece)):
 					continue
-				h = self.predictNextPiece(board,nextPiece)
+				h = self.calculateHeuristic(self.getReasonableBoard(board,currentPiece))#self.predictNextPiece(board,nextPiece)
 				if (h>maxH):
 					maxH=h
 					maxRot=rot

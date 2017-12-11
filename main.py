@@ -49,9 +49,9 @@ b=0
 c=0
 d=0
 trials = 0
-maxTrials = 2
+maxTrials = 10000
 
-FILE = open('Outputs.txt', 'a+')
+FILE = 'Outputs.txt'
 
 # set up the rect data structure
 def makenewblock(block):
@@ -310,23 +310,17 @@ piece=0
 print (datetime.datetime.now())     
 
 def triggerEnd():
-    global a, b, c, d
-    values = [a, b, c, d, points]
+    global ai
+    values = [ai.aggConst, ai.lineConst, ai.holesConst, ai.bumpConst,ai.multiLineWeight, points]
     L = str(values)
     L = "\n" + L[1:len(L)-1]
     print("Writing " + L + " to output file")
-    global FILE
-    FILE.write(L)
+    with open(FILE, 'a+') as file:
+        file.write(L)
+    ai.setScore(points)
+    testedAIs.append(ai)
+    ai = GeneticAlgorithm()
     reset()
-
-    global trials, maxTrials
-    if trials < maxTrials:
-        global ai
-        GeneticAlgorithm()
-        ai = tetrai(a,b,c,d,1,columnwidth,rowheight)
-        trials += 1
-    else:
-        FILE.close()
 
 def reset():
     global pieces
@@ -351,47 +345,62 @@ def reset():
 #AI GOES HERE
 from AI.Tetrai import tetrai
 
+AIs=Queue()
+testedAIs=[]
+generationSize = 10
+defaults={'agg':-0.424901586203,'line':0.0852051917,'holes':-0.342468020508,'bump':-0.147425201574175,'multi':0}
+generation=16
+blockCount=0
+blockLimit=10000
 #Genetic Algorithm being read from Text file for actual genetic variables
 def GeneticAlgorithm():
-    grid_data = []
-    with open('Outputs.txt', 'r') as file:
-        grid_data = [line.strip('\n').split(', ') for line in file.readlines()]
+    global blockCount
+    blockCount=0
+    if not AIs.empty():
+        return AIs.get()
 
-    v = 0
-    while v < len(grid_data):
-        if len(grid_data[v]) != 5:
-            grid_data.pop(v)
-        else:
-            v += 1
 
-    #Natural Selection (survival of the fittest)
-    """
-    f_mother = 0.0
-    f_father = 0.0
-    i_mother = 0
-    i_father = 0
-    for j in range(0, len(grid_data)):
-        fitness = float(grid_data[j][4])
-        if fitness > f_mother:
-            i_father = i_mother
-            f_father = f_mother        
-            i_mother = j
-            f_mother = fitness
-    """
-    #Random selection
-    i_father = random.randint(0,len(grid_data) - 1)
-    i_mother = random.randint(0,len(grid_data) - 1)
-    while i_mother == i_father:
-        random.randint(0,len(grid_data) - 1)
 
-    global a, b, c, d
-    a = (float(grid_data[i_mother][0]) + float(grid_data[i_father][0])) / 2.0
-    b = (float(grid_data[i_mother][1]) + float(grid_data[i_father][1])) / 2.0
-    c = (float(grid_data[i_mother][2]) + float(grid_data[i_father][2])) / 2.0
-    d = (float(grid_data[i_mother][3]) + float(grid_data[i_father][3])) / 2.0
+    if len(testedAIs) ==0:
+        agg = defaults['agg']
+        line = defaults['line']
+        holes = defaults['holes']
+        bump = defaults['bump']
+        multi = defaults['multi']
+    else:
+        global generation
+        bests=[testedAIs[0],testedAIs[1]]
+        for aai in testedAIs:
+            if aai.score > bests[1].score:
+                bests[0]=bests[1]
+                bests[1]=aai
+                continue
+            if aai.score>bests[0].score:
+                bests[0]=aai
+        agg = (bests[0].aggConst + bests[1].aggConst)/2
+        line = (bests[0].lineConst + bests[1].lineConst)/2
+        holes = (bests[0].holesConst + bests[1].holesConst)/2
+        bump = (bests[0].bumpConst + bests[1].bumpConst)/2
+        multi = (bests[0].multiLineWeight + bests[1].multiLineWeight)/2
+        with open(FILE, 'a+') as file:
+            file.write("\n\nBest from Generation {}".format(generation))
+            for aai in bests:
+                values = [aai.aggConst, aai.lineConst, aai.holesConst, aai.bumpConst,aai.multiLineWeight, aai.score]
+                L = str(values)
+                L = "\n" + L[1:len(L)-1]
+                print("Writing " + L + " to output file")
+                file.write(L)
+            generation+=1
+            file.write("\n\nGeneration {}:".format(generation))
+        global testedAIs
+        testedAIs=[]
 
-GeneticAlgorithm()
-ai = tetrai(a,b,c,d,1,columnwidth,rowheight)
+    for i in range (generationSize):
+        AIs.put(tetrai((random.random()+1)*agg,(random.random()+1)*line,(random.random()+1)*holes,(random.random()+1)*bump,(random.random()+1)*multi,columnwidth,rowheight))
+
+    return AIs.get()
+
+ai = GeneticAlgorithm()
 
 moves = Queue()
 
@@ -476,6 +485,10 @@ while True:
 
     if newblock:
         ending=False
+        blockCount+=1
+        if (blockCount>blockLimit):
+            triggerEnd()
+            continue
         newb = makenewblock(blocks[pieces[piece]])
         for bbbb in blockonscreen:
             for i in range(len(newb)-1):
