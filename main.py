@@ -302,7 +302,14 @@ print (datetime.datetime.now())
 #AI GOES HERE
 from AI.Tetrai import tetrai
 
-ai = tetrai(-.510066,.760666,-.35663,-.184483,1,columnwidth,rowheight)
+grid_data = []
+FILE = open('Outputs.txt')
+
+with FILE as f:
+    grid_data = [i.split(',') for i in f.readlines()]
+L = len(grid_data) - 1
+
+ai = tetrai(float(grid_data[L][0]),float(grid_data[L][1]),float(grid_data[L][2]),float(grid_data[L][3]),1,columnwidth,rowheight)
 
 moves = Queue()
 
