@@ -48,7 +48,7 @@ b=0
 c=0
 d=0
 
-FILE = open('Outputs.txt')
+FILE = open('Outputs.txt', 'w+')
 
 # set up the rect data structure
 def makenewblock(block):
@@ -307,9 +307,15 @@ piece=0
 print (datetime.datetime.now())     
 
 def triggerEnd():
+    global a, b, c, d
     values = [a, b, c, d, points]
-    FILE.write(str(values))
+    L = str(values)
+    L = L[1:len(L)-1] + '\n'
+    print(L)
+    global FILE
+    FILE.write(L)
     reset()
+    FILE = open('Outputs.txt', 'w+')
     GeneticAlgorithm()
     ai = tetrai(a,b,c,d,1,columnwidth,rowheight)
 
@@ -343,7 +349,6 @@ def GeneticAlgorithm():
     f_father = 0.0
     i_mother = 0
     i_father = 0
-    alternate = False
 
     with FILE as f:
         grid_data = [i.split(',') for i in f.readlines()]
@@ -356,9 +361,13 @@ def GeneticAlgorithm():
             i_mother = j
             f_mother = fitness
 
+    global a
     a = (float(grid_data[i_mother][0]) + float(grid_data[i_father][0])) / 2.0
+    global b
     b = (float(grid_data[i_mother][1]) + float(grid_data[i_father][1])) / 2.0
+    global c
     c = (float(grid_data[i_mother][2]) + float(grid_data[i_father][2])) / 2.0
+    global d
     d = (float(grid_data[i_mother][3]) + float(grid_data[i_father][3])) / 2.0
 
 ai = tetrai(a,b,c,d,1,columnwidth,rowheight)
