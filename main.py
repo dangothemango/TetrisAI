@@ -50,7 +50,7 @@ d=0
 trials = 0
 maxTrials = 10
 
-FILE = open('Outputs.txt', 'w+')
+FILE = open('Outputs.txt', 'a+')
 
 # set up the rect data structure
 def makenewblock(block):
@@ -317,7 +317,7 @@ def triggerEnd():
     global FILE
     FILE.write(L)
     reset()
-    
+
     global trials, maxTrials
     if trials < maxTrials:
         global ai
@@ -357,9 +357,16 @@ def GeneticAlgorithm():
     f_father = 0.0
     i_mother = 0
     i_father = 0
+    v = 0
 
-    with FILE as file:
-        grid_data = [line.split(',') for line in file.readlines()]
+    with open('Outputs.txt', 'r') as file:
+        grid_data = [line.strip('\n').split(', ') for line in file.readlines()]
+
+    while v < len(grid_data):
+        if len(grid_data[v]) != 5:
+            grid_data.pop(v)
+        else:
+            v += 1
 
     for j in range(0, len(grid_data)):
         fitness = float(grid_data[j][4])
