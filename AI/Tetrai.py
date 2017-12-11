@@ -31,6 +31,7 @@ class tetrai:
 		maxH = -99999999
 		maxLoc = -1
 		maxRot = -1
+		moveLoc=-1
 
 		for rot in range (self.getUniqueRot(currentPiece)):
 			for column in range(10):
@@ -48,16 +49,31 @@ class tetrai:
 
 		moveQueue = Queue()
 		for i in range(maxRot):
-			moveQueue.put(pygame.K_UP)
-		loc = 4
-		self.setShapeToColumn(currentPiece,4)
-		while loc!=maxLoc:
-			moveQueue.put(pygame.K_LEFT if maxLoc<loc else pygame.K_RIGHT)
-			loc += -1 if maxLoc<loc else 1
+			self.rotate(currentPiece)
+
+		moveLoc=self.getShapeColumn(currentPiece)
+		while moveLoc!=maxLoc:
+			if (moveLoc<maxLoc):
+				moveQueue.put(pygame.K_RIGHT)
+				moveLoc+=1
+			else:
+				moveQueue.put(pygame.K_LEFT)
+				moveLoc-=1
+		
 
 		moveQueue.put(pygame.K_SPACE)
 		return moveQueue
 
+
+	def getShapeColumn(self,shape):
+		lowestX = 9999999
+		lowestY = 9999999
+
+		for i in range(4):
+			if shape[i].left<lowestX:
+				lowestX = shape[i].left
+
+		return lowestX//self.columnWidth
 
 	def shapeOutOfBounds(self, shape):
 		for i in range (len(shape)-1):
@@ -78,8 +94,6 @@ class tetrai:
 		for i in range (len(curBlock)-1):
 			if (curBlock[i].top>=0 and curBlock[i].left<=self.columnWidth*9 and  curBlock[i].left>=0 ):
 					newBoard[curBlock[i].left//self.columnWidth][19-curBlock[i].top//self.rowHeight]=1
-		print(newBoard)
-		print("\n\n\n\n")
 		return newBoard
 
 	def calculateHeuristic(self, board):
@@ -168,7 +182,7 @@ class tetrai:
 			self.rotatea(curr)
 
 	def rotatei(self,curr):
-		bla=0
+		bla=1
 		if curr[2].centerx>curr[0].centerx and curr[3].centerx>curr[0].centerx:
 			horiz=True
 			curr[0].centerx+=self.columnWidth
