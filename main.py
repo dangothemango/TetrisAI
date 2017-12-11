@@ -311,11 +311,9 @@ def triggerEnd():
     values = [a, b, c, d, points]
     L = str(values)
     L = L[1:len(L)-1] + '\n'
-    print(L)
     global FILE
     FILE.write(L)
     reset()
-    FILE = open('Outputs.txt', 'w+')
     GeneticAlgorithm()
     ai = tetrai(a,b,c,d,1,columnwidth,rowheight)
 
@@ -350,7 +348,7 @@ def GeneticAlgorithm():
     i_mother = 0
     i_father = 0
 
-    with FILE as f:
+    with open('Outputs.txt') as f:
         grid_data = [i.split(',') for i in f.readlines()]
 
     for j in range(0, len(grid_data)):
@@ -361,17 +359,14 @@ def GeneticAlgorithm():
             i_mother = j
             f_mother = fitness
 
-    global a
+    global a, b, c, d
     a = (float(grid_data[i_mother][0]) + float(grid_data[i_father][0])) / 2.0
-    global b
     b = (float(grid_data[i_mother][1]) + float(grid_data[i_father][1])) / 2.0
-    global c
     c = (float(grid_data[i_mother][2]) + float(grid_data[i_father][2])) / 2.0
-    global d
     d = (float(grid_data[i_mother][3]) + float(grid_data[i_father][3])) / 2.0
 
+GeneticAlgorithm()
 ai = tetrai(a,b,c,d,1,columnwidth,rowheight)
-#ai = tetrai(-.510066,.760666,-.35664,-.184483,1,columnwidth,rowheight)
 
 moves = Queue()
 
@@ -476,7 +471,7 @@ while True:
             piece=0
         nexpiece=nextpiece()
         print(points)
-        moves = ai.calculateNewMove(blockonscreen,curblock,makenewblock(blocks[pieces[piece]]))
+        moves = ai.calculateNewMove(blockonscreen,curblock,None)
     if hi>=blockmovecount:
         for i in range(4):
             curblock[i].top+=(rowheight)
