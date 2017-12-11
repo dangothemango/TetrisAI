@@ -21,7 +21,7 @@ class tetrai:
 		self.aggConst = aggConst
 		self.lineConst = lineConst
 		self.holesConst = holesConst
-		self.bumpConst = bumpConst
+		self.bumpConst =  bumpConst
 		self.multiLineWeight = multiLineWeight
 		self.columnWidth = columnWidth
 		self.rowHeight = rowHeight
@@ -164,6 +164,9 @@ class tetrai:
 					currentPiece[i].top-=(self.rowHeight)
 					fix=0
 				break
+
+		if currentPiece[i].top>=self.rowHeight*20:
+			pygame.quit()
 
 	def overlap(self,one,two,three):
 		for bk in two:
