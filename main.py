@@ -369,8 +369,7 @@ moves = Queue()
 while True:
 
     if (not moves.empty()):
-        pass
-        #pygame.event.post(pygame.event.Event(pygame.KEYDOWN,key=moves.get()))
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN,key=moves.get()))
 
     # check for the QUIT event
     for event in pygame.event.get():
