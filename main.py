@@ -6,6 +6,7 @@
 
 import pygame, sys, time, random, datetime
 from pygame.locals import *
+from queue import Queue
 
 # set up pygame
 
@@ -69,6 +70,7 @@ def harddrop():
                 fix=0
             lineclear()
             break
+
 def makeghost():
     fix=0
     ghost=[]
@@ -295,9 +297,23 @@ def holdblock():
             
 pieces=shufflefirst()
 piece=0
-print (datetime.datetime.now())               
+print (datetime.datetime.now())     
+
+#AI GOES HERE
+from AI.Tetrai import tetrai
+
+ai = tetrai(-.510066,.760666,-.35663,-.184483,1,columnwidth,rowheight)
+
+moves = Queue()
+
+
+
 # run the game loop
 while True:
+
+    if (not moves.empty()):
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN,key=moves.get()))
+
     # check for the QUIT event
     for event in pygame.event.get():
         
@@ -379,6 +395,7 @@ while True:
             piece=0
         nexpiece=nextpiece()
         print(points)
+        moves = ai.calculateNewMove(blockonscreen,curblock,None)
     if hi>=blockmovecount:
         for i in range(4):
             curblock[i].top+=(rowheight)
