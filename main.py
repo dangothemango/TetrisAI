@@ -43,6 +43,12 @@ fix=0
 speed=.02
 hi=0
 blockmovecount=9
+a=0
+b=0
+c=0
+d=0
+
+FILE = open('Outputs.txt')
 
 # set up the rect data structure
 def makenewblock(block):
@@ -301,8 +307,11 @@ piece=0
 print (datetime.datetime.now())     
 
 def triggerEnd():
+    values = [a, b, c, d, points]
+    FILE.write(str(values))
     reset()
-
+    GeneticAlgorithm()
+    ai = tetrai(a,b,c,d,1,columnwidth,rowheight)
 
 def reset():
     global pieces
@@ -328,29 +337,29 @@ def reset():
 from AI.Tetrai import tetrai
 
 #Genetic Algorithm being read from Text file for actual genetic variables
-grid_data = []
-FILE = open('Outputs.txt')
-f_mother = 0.0
-f_father = 0.0
-i_mother = 0
-i_father = 0
-alternate = False
+def GeneticAlgorithm():
+    grid_data = []
+    f_mother = 0.0
+    f_father = 0.0
+    i_mother = 0
+    i_father = 0
+    alternate = False
 
-with FILE as f:
-    grid_data = [i.split(',') for i in f.readlines()]
+    with FILE as f:
+        grid_data = [i.split(',') for i in f.readlines()]
 
-for j in range(0, len(grid_data)):
-    fitness = float(grid_data[j][4])
-    if fitness > f_mother:
-        i_father = i_mother
-        f_father = f_mother        
-        i_mother = j
-        f_mother = fitness
+    for j in range(0, len(grid_data)):
+        fitness = float(grid_data[j][4])
+        if fitness > f_mother:
+            i_father = i_mother
+            f_father = f_mother        
+            i_mother = j
+            f_mother = fitness
 
-a = (float(grid_data[i_mother][0]) + float(grid_data[i_father][0])) / 2.0
-b = (float(grid_data[i_mother][1]) + float(grid_data[i_father][1])) / 2.0
-c = (float(grid_data[i_mother][2]) + float(grid_data[i_father][2])) / 2.0
-d = (float(grid_data[i_mother][3]) + float(grid_data[i_father][3])) / 2.0
+    a = (float(grid_data[i_mother][0]) + float(grid_data[i_father][0])) / 2.0
+    b = (float(grid_data[i_mother][1]) + float(grid_data[i_father][1])) / 2.0
+    c = (float(grid_data[i_mother][2]) + float(grid_data[i_father][2])) / 2.0
+    d = (float(grid_data[i_mother][3]) + float(grid_data[i_father][3])) / 2.0
 
 ai = tetrai(a,b,c,d,1,columnwidth,rowheight)
 #ai = tetrai(-.510066,.760666,-.35664,-.184483,1,columnwidth,rowheight)
