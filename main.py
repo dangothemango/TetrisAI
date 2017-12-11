@@ -353,6 +353,7 @@ c = (float(grid_data[i_mother][2]) + float(grid_data[i_father][2])) / 2.0
 d = (float(grid_data[i_mother][3]) + float(grid_data[i_father][3])) / 2.0
 
 ai = tetrai(a,b,c,d,1,columnwidth,rowheight)
+#ai = tetrai(-.510066,.760666,-.35664,-.184483,1,columnwidth,rowheight)
 
 moves = Queue()
 
@@ -457,7 +458,7 @@ while True:
             piece=0
         nexpiece=nextpiece()
         print(points)
-        moves = ai.calculateNewMove(blockonscreen,curblock,None)
+        moves = ai.calculateNewMove(blockonscreen,curblock,makenewblock(blocks[pieces[piece]]))
     if hi>=blockmovecount:
         for i in range(4):
             curblock[i].top+=(rowheight)
