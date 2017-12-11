@@ -39,7 +39,6 @@ class tetrai:
 				if (self.shapeOutOfBounds(currentPiece)):
 					continue
 				h = self.calculateHeuristic(self.getReasonableBoard(board,currentPiece))
-				print(h)
 				if (h>maxH):
 					maxH=h
 					maxRot=rot
@@ -57,9 +56,6 @@ class tetrai:
 			loc += -1 if maxLoc<loc else 1
 
 		moveQueue.put(pygame.K_SPACE)
-		print(maxH)
-		print(maxRot)
-		print(maxLoc)
 		return moveQueue
 
 
@@ -70,7 +66,6 @@ class tetrai:
 		return False
 
 	def getReasonableBoard(self, board,curBlock):
-		print(board)
 		newBoard = list()
 		for i in range (10):
 			newBoard.append(list())
