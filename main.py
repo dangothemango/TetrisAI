@@ -47,6 +47,8 @@ a=0
 b=0
 c=0
 d=0
+trials = 0
+maxTrials = 10
 
 FILE = open('Outputs.txt', 'w+')
 
@@ -311,11 +313,19 @@ def triggerEnd():
     values = [a, b, c, d, points]
     L = str(values)
     L = L[1:len(L)-1] + '\n'
+    print(L)
     global FILE
     FILE.write(L)
     reset()
-    GeneticAlgorithm()
-    ai = tetrai(a,b,c,d,1,columnwidth,rowheight)
+    
+    global trials, maxTrials
+    if trials < maxTrials:
+        global ai
+        GeneticAlgorithm()
+        ai = tetrai(a,b,c,d,1,columnwidth,rowheight)
+        trials += 1
+    else:
+        FILE.close()
 
 def reset():
     global pieces
@@ -348,8 +358,8 @@ def GeneticAlgorithm():
     i_mother = 0
     i_father = 0
 
-    with open('Outputs.txt') as f:
-        grid_data = [i.split(',') for i in f.readlines()]
+    with FILE as file:
+        grid_data = [line.split(',') for line in file.readlines()]
 
     for j in range(0, len(grid_data)):
         fitness = float(grid_data[j][4])
