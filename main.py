@@ -488,7 +488,7 @@ while True:
             piece=0
         nexpiece=nextpiece()
         print(points)
-        moves = ai.calculateNewMove(blockonscreen,curblock,None)
+        moves = ai.calculateNewMove(blockonscreen,curblock,makenewblock(blocks[pieces[piece]]))
     if hi>=blockmovecount:
         for i in range(4):
             curblock[i].top+=(rowheight)
