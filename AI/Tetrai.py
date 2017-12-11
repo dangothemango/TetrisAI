@@ -39,7 +39,7 @@ class tetrai:
 				self.moveShapeToBottom(currentPiece,board)
 				if (self.shapeOutOfBounds(currentPiece)):
 					continue
-				h = self.calculateHeuristic(self.getReasonableBoard(board,currentPiece))
+				h = self.predictNextPiece(board,nextPiece)
 				if (h>maxH):
 					maxH=h
 					maxRot=rot
@@ -63,6 +63,24 @@ class tetrai:
 
 		moveQueue.put(pygame.K_SPACE)
 		return moveQueue
+
+	def predictNextPiece(self,board,currentPiece):
+		maxH = -99999999
+
+		for rot in range (self.getUniqueRot(currentPiece)):
+			for column in range(10):
+				self.setShapeToColumn(currentPiece,column)
+				self.moveShapeToBottom(currentPiece,board)
+				if (self.shapeOutOfBounds(currentPiece)):
+					continue
+				h = self.calculateHeuristic(self.getReasonableBoard(board,currentPiece))
+				if (h>maxH):
+					maxH=h
+			self.setShapeToColumn(currentPiece,4)
+			self.rotate(currentPiece)
+
+		return maxH
+
 
 
 	def getShapeColumn(self,shape):
