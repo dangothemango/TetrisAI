@@ -7,6 +7,7 @@
 import pygame, sys, time, random, datetime
 from pygame.locals import *
 from queue import Queue
+import random
 
 # set up pygame
 
@@ -48,7 +49,7 @@ b=0
 c=0
 d=0
 trials = 0
-maxTrials = 10
+maxTrials = 2
 
 FILE = open('Outputs.txt', 'a+')
 
@@ -312,8 +313,8 @@ def triggerEnd():
     global a, b, c, d
     values = [a, b, c, d, points]
     L = str(values)
-    L = L[1:len(L)-1] + '\n'
-    print(L)
+    L = "\n" + L[1:len(L)-1]
+    print("Writing " + L + " to output file")
     global FILE
     FILE.write(L)
     reset()
@@ -353,21 +354,22 @@ from AI.Tetrai import tetrai
 #Genetic Algorithm being read from Text file for actual genetic variables
 def GeneticAlgorithm():
     grid_data = []
-    f_mother = 0.0
-    f_father = 0.0
-    i_mother = 0
-    i_father = 0
-    v = 0
-
     with open('Outputs.txt', 'r') as file:
         grid_data = [line.strip('\n').split(', ') for line in file.readlines()]
 
+    v = 0
     while v < len(grid_data):
         if len(grid_data[v]) != 5:
             grid_data.pop(v)
         else:
             v += 1
 
+    #Natural Selection (survival of the fittest)
+    """
+    f_mother = 0.0
+    f_father = 0.0
+    i_mother = 0
+    i_father = 0
     for j in range(0, len(grid_data)):
         fitness = float(grid_data[j][4])
         if fitness > f_mother:
@@ -375,6 +377,12 @@ def GeneticAlgorithm():
             f_father = f_mother        
             i_mother = j
             f_mother = fitness
+    """
+    #Random selection
+    i_father = random.randint(0,len(grid_data) - 1)
+    i_mother = random.randint(0,len(grid_data) - 1)
+    while i_mother == i_father:
+        random.randint(0,len(grid_data) - 1)
 
     global a, b, c, d
     a = (float(grid_data[i_mother][0]) + float(grid_data[i_father][0])) / 2.0
