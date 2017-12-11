@@ -32,11 +32,12 @@ yellow=(255,255,0)
 cyan=(0, 255, 255)
 grey=(128, 128, 128)
 orange=(255, 127, 0)
-points=0
+
 blocks=[[[-1,0],[1,0],[2,0],cyan],[[-1,0],[-1,-1],[1,0],blue],[[-1,0],[1,0],[1,-1],orange],[[0,-1],[1,-1],[1,0],yellow],[[-1,0],[0,-1],[1,-1],green],[[-1,0],[0,-1],[1,0],purple],[[-1,-1],[0,-1],[1,0],red]]
-blockonscreen=[]
 startspotx=columnwidth*4
 startspoty=-rowheight
+blockonscreen=[]
+points=0
 newblock=1
 fix=0
 speed=.02
@@ -294,10 +295,34 @@ def holdblock():
                 held.remove(held[0])
         curb=blockonscreen[len(blockonscreen)-1]
     return newblock,curb
-            
+
 pieces=shufflefirst()
 piece=0
 print (datetime.datetime.now())     
+
+def triggerEnd():
+    reset()
+
+
+def reset():
+    global pieces
+    pieces=shufflefirst()
+    global piece
+    piece=0
+    global held
+    held=[]
+    global blockonscreen
+    blockonscreen=[]
+    global points
+    points=0
+    global newblock
+    newblock=1
+    global fix
+    fix=0
+    global hi
+    hi=0
+    global blockmovecount
+    blockmovecount=9
 
 #AI GOES HERE
 from AI.Tetrai import tetrai
@@ -312,7 +337,8 @@ moves = Queue()
 while True:
 
     if (not moves.empty()):
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN,key=moves.get()))
+        pass
+        #pygame.event.post(pygame.event.Event(pygame.KEYDOWN,key=moves.get()))
 
     # check for the QUIT event
     for event in pygame.event.get():
@@ -370,6 +396,9 @@ while True:
                             brea=True
                     if brea:
                         break
+            elif event.key == pygame.K_r:
+                reset()
+
             elif event.key==pygame.K_RSHIFT or event.key==pygame.K_LSHIFT:
                 n=holdblock()
                 newblock=n[0]
@@ -385,7 +414,18 @@ while True:
     window.fill(BLACK)
 
     if newblock:
-        blockonscreen.append(makenewblock(blocks[pieces[piece]]))
+        ending=False
+        newb = makenewblock(blocks[pieces[piece]])
+        for bbbb in blockonscreen:
+            for i in range(len(newb)-1):
+                for j in range(len(bbbb)-1):
+                    if newb[i].left == bbbb[j].left and newb[i].top == bbbb[j].top:
+                        ending=True
+                        triggerEnd()
+                        break
+        if ending:
+            continue
+        blockonscreen.append(newb)
         newblock=0
         curblock=blockonscreen[len(blockonscreen)-1]
         ghost=makeghost()
