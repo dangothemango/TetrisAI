@@ -4,7 +4,7 @@
 #Tetris
 
 
-import pygame, sys, time, random, datetime
+import pygame, sys, time, random, datetime,math
 from pygame.locals import *
 from queue import Queue
 import random
@@ -248,8 +248,13 @@ def nextpiece():
     return nextpieces
 
 def lineclear():
+    clears=lineClear()
+    global points
+    points+=(clears**2)*10
+
+def lineClear():
     bla=False
-    numd=[]
+    clears = 0
     for d in reversed(range(20)):
         a=0
         for c in blockonscreen:
@@ -269,15 +274,12 @@ def lineclear():
                 for x in range(len(c)-1):
                     if c[x].top<rowheight*d:
                         c[x].top+=rowheight
-            numd.append('')
-            global points
-            points+=10
-            lineclear()
+            clears+=lineClear()+1
             break
     for bk in blockonscreen:
         if len(bk)==1:
             blockonscreen.remove(bk)
-    return len(numd)
+    return clears
 
 held=[]
 
@@ -311,15 +313,13 @@ print (datetime.datetime.now())
 
 def triggerEnd():
     global ai
-    values = [ai.aggConst, ai.lineConst, ai.holesConst, ai.bumpConst,ai.multiLineWeight, points]
-    L = str(values)
-    L = "\n" + L[1:len(L)-1]
-    print("Writing " + L + " to output file")
+    ai.setScore(points)
+    L = "\n"+str(ai)
     with open(FILE, 'a+') as file:
         file.write(L)
-    ai.setScore(points)
     testedAIs.append(ai)
     ai = GeneticAlgorithm()
+    print(ai,end="\n\n")
     reset()
 
 def reset():
@@ -347,11 +347,11 @@ from AI.Tetrai import tetrai
 
 AIs=Queue()
 testedAIs=[]
-generationSize = 10
-defaults={'agg':-0.424901586203,'line':0.0852051917,'holes':-0.342468020508,'bump':-0.147425201574175,'multi':0}
-generation=16
+generationSize = 15
+defaults={'agg':-1,'line':1,'holes':-1,'bump':-1,'multi':0}
+generation=0
 blockCount=0
-blockLimit=10000
+blockLimit=1000
 #Genetic Algorithm being read from Text file for actual genetic variables
 def GeneticAlgorithm():
     global blockCount
@@ -367,40 +367,51 @@ def GeneticAlgorithm():
         holes = defaults['holes']
         bump = defaults['bump']
         multi = defaults['multi']
+
+        for i in range (generationSize):
+            AIs.put(tetrai((random.choice([-1,1,0.0001]))*agg,(random.choice([-1,1,0.0001]))*line,(random.choice([-1,1,0.0001]))*holes,(random.choice([-1,1,0.0001]))*bump,(random.choice([-1,1,0.0001]))*multi,columnwidth,rowheight))
     else:
         global generation
         bests=[testedAIs[0],testedAIs[1]]
         for aai in testedAIs:
-            if aai.score > bests[1].score:
+            if aai.score >= bests[1].score:
                 bests[0]=bests[1]
                 bests[1]=aai
                 continue
-            if aai.score>bests[0].score:
+            if aai.score>=bests[0].score:
                 bests[0]=aai
-        agg = (bests[0].aggConst + bests[1].aggConst)/2
-        line = (bests[0].lineConst + bests[1].lineConst)/2
-        holes = (bests[0].holesConst + bests[1].holesConst)/2
-        bump = (bests[0].bumpConst + bests[1].bumpConst)/2
-        multi = (bests[0].multiLineWeight + bests[1].multiLineWeight)/2
         with open(FILE, 'a+') as file:
             file.write("\n\nBest from Generation {}".format(generation))
             for aai in bests:
-                values = [aai.aggConst, aai.lineConst, aai.holesConst, aai.bumpConst,aai.multiLineWeight, aai.score]
-                L = str(values)
-                L = "\n" + L[1:len(L)-1]
-                print("Writing " + L + " to output file")
+                L = "\n"+str(aai)
                 file.write(L)
             generation+=1
             file.write("\n\nGeneration {}:".format(generation))
         global testedAIs
         testedAIs=[]
+        AIs.put(bests[0])
+        AIs.put(bests[1])
+        for i in range (math.ceil((generationSize-2)*.7)):
+            randomWeight=random.random()
+            agg=(bests[1].aggConst*randomWeight+bests[0].aggConst*(1-randomWeight))/2
+            randomWeight=random.random()
+            line=(bests[1].lineConst*randomWeight+bests[0].lineConst*(1-randomWeight))/2
+            randomWeight=random.random()
+            holes=(bests[1].holesConst*randomWeight+bests[0].holesConst*(1-randomWeight))/2
+            randomWeight=random.random()
+            bump=(bests[1].bumpConst*randomWeight+bests[0].bumpConst*(1-randomWeight))/2
+            randomWeight=random.random()
+            multi=(bests[1].multiLineWeight*randomWeight+bests[0].multiLineWeight*(1-randomWeight))/2
+            AIs.put(tetrai(agg,line,holes,bump,multi,columnwidth,rowheight))
+        for i in range(math.floor((generationSize-2)*.3)):
+            AIs.put(tetrai(math.copysign((random.random()),random.choice(bests).aggConst),math.copysign((random.random()),random.choice(bests).lineConst),math.copysign((random.random()),random.choice(bests).holesConst),math.copysign((random.random()),random.choice(bests).bumpConst),math.copysign((random.random()),random.choice(bests).multiLineWeight),columnwidth,rowheight))
 
-    for i in range (generationSize):
-        AIs.put(tetrai((random.random()+1)*agg,(random.random()+1)*line,(random.random()+1)*holes,(random.random()+1)*bump,(random.random()+1)*multi,columnwidth,rowheight))
+
 
     return AIs.get()
 
 ai = GeneticAlgorithm()
+print(ai,end="\n\n")
 
 moves = Queue()
 
@@ -508,7 +519,6 @@ while True:
             pieces=shuffle()
             piece=0
         nexpiece=nextpiece()
-        print(points)
         moves = ai.calculateNewMove(blockonscreen,curblock,makenewblock(blocks[pieces[piece]]))
     if hi>=blockmovecount:
         for i in range(4):

@@ -268,3 +268,6 @@ class tetrai:
 				curr[r].centerx+=(2*self.columnWidth)
 			elif curr[r].centerx>middlex and curr[r].centery<middley:
 				curr[r].centery+=(2*self.rowHeight)
+
+	def __str__(self):
+		return "Agg: {}, Lines: {}, Holes: {}, Bump: {}, Multi: {}, Fitness: {}".format(self.aggConst,self.lineConst,self.holesConst,self.bumpConst,self.multiLineWeight,self.score)
